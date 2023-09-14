@@ -998,6 +998,7 @@ public class PostHog {
     private boolean captureDeepLinks = false;
     private Crypto crypto;
     private Integration integration;
+    private Logger logger;
 
     /** Start building a new {@link PostHog} instance. */
     public Builder(Context context, String apiKey) {
@@ -1199,6 +1200,11 @@ public class PostHog {
       return this;
     }
 
+    public Builder logger(Logger logger) {
+      this.logger = logger;
+      return this;
+    }
+
     /** Create a {@link PostHog} client. */
     public PostHog build() {
       if (isNullOrEmpty(tag)) {
@@ -1251,7 +1257,9 @@ public class PostHog {
         persistenceCache.set(persistence);
       }
 
-      Logger logger = Logger.with(logLevel);
+      if (logger == null) {
+        logger = Logger.with(logLevel);
+      }
       PostHogContext posthogContext =
           PostHogContext.create(application, propertiesCache.get(), collectDeviceID);
       CountDownLatch advertisingIdLatch = new CountDownLatch(1);

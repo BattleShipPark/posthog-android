@@ -354,6 +354,8 @@ class PostHogIntegration extends Integration<Void> {
 
       // Upload the payloads.
       connection.close();
+
+      throwException();
     } catch (Client.HTTPException e) {
       if (e.is4xx() && e.responseCode != 429) {
         // Simply log and proceed to remove the rejected payloads from the queue.
@@ -388,6 +390,10 @@ class PostHogIntegration extends Integration<Void> {
     if (payloadQueue.size() > 0) {
       performFlush(); // Flush any remaining items.
     }
+  }
+
+  private void throwException() throws IOException {
+    throw new IOException();
   }
 
   void shutdown() {

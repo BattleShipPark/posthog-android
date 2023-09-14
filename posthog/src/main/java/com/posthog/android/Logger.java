@@ -38,6 +38,12 @@ public final class Logger {
   public final LogLevel logLevel;
   private final String tag;
 
+  public interface ErrorCallback {
+   void onError(Throwable error, String message);
+  }
+
+  public ErrorCallback errorCallback = null;
+
   public Logger(String tag, LogLevel logLevel) {
     this.tag = tag;
     this.logLevel = logLevel;
@@ -68,6 +74,9 @@ public final class Logger {
   public void error(Throwable error, String format, Object... extra) {
     if (shouldLog(INFO)) {
       Log.e(tag, String.format(format, extra), error);
+      if (errorCallback != null) {
+          errorCallback.onError(error, String.format(format, extra));
+      }
     }
   }
 

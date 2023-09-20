@@ -789,6 +789,10 @@ public class PostHog {
 
   @Private
   void fillAndEnqueue(BasePayload.Builder<?, ?> builder, Options options) {
+    if (builder instanceof CapturePayload.Builder) {
+      logger.debug(
+              "Before fillAndEnqueue %s", ((CapturePayload.Builder) builder).build());
+    }
     waitForAdvertisingId();
 
     PostHogContext contextCopy = new PostHogContext(posthogContext);
@@ -810,6 +814,7 @@ public class PostHog {
   }
 
   void enqueue(BasePayload payload) {
+    logger.debug("enqueue %s", payload);
     if (optOut.get()) {
       return;
     }

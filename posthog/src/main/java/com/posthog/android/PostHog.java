@@ -448,11 +448,14 @@ public class PostHog {
       throw new IllegalArgumentException("event must not be null or empty.");
     }
 
+    logger.debug("capture: %s", event);
     posthogExecutor.submit(
         new Runnable() {
           @RequiresApi(api = Build.VERSION_CODES.N)
           @Override
           public void run() {
+            logger.debug("executor in capture: %s", event);
+
             final Options finalOptions;
             if (options == null) {
               finalOptions = defaultOptions;
@@ -676,9 +679,13 @@ public class PostHog {
               finalGroupProperties = groupProperties;
             }
 
-            GroupPayload.Builder builder =
-                new GroupPayload.Builder().groupType(groupType).groupKey(groupKey).groupProperties(finalGroupProperties);
-            fillAndEnqueue(builder, finalOptions);
+            try {
+              GroupPayload.Builder builder =
+                  new GroupPayload.Builder().groupType(groupType).groupKey(groupKey).groupProperties(finalGroupProperties);
+              fillAndEnqueue(builder, finalOptions);
+            } catch (Exception e) {
+              logger.error(e, "fillAndEnqueue");
+            }
           }
         });
 

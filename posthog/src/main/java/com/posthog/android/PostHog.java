@@ -790,8 +790,7 @@ public class PostHog {
   @Private
   void fillAndEnqueue(BasePayload.Builder<?, ?> builder, Options options) {
     if (builder instanceof CapturePayload.Builder) {
-      logger.debug(
-              "Before fillAndEnqueue %s", ((CapturePayload.Builder) builder).build());
+      logger.debug("Before fillAndEnqueue");
     }
     waitForAdvertisingId();
 

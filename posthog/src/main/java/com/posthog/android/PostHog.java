@@ -454,47 +454,51 @@ public class PostHog {
           @RequiresApi(api = Build.VERSION_CODES.N)
           @Override
           public void run() {
-            logger.debug("executor in capture: %s", event);
+            try {
+              logger.debug("executor in capture: %s", event);
 
-            final Options finalOptions;
-            if (options == null) {
-              finalOptions = defaultOptions;
-            } else {
-              finalOptions = options;
-            }
-
-            final Properties finalProperties;
-            if (properties == null) {
-              finalProperties = EMPTY_PROPERTIES;
-            } else {
-              finalProperties = properties;
-            }
-
-            // Send feature flags with capture call
-            boolean shouldSendFeatureFlags = true;
-            if (
-                    options != null &&
-                            !options.context().isEmpty() &&
-                            options.context().get(SEND_FEATURE_FLAGS_KEY) instanceof Boolean
-            ) {
-              shouldSendFeatureFlags = (Boolean) options.context().get(SEND_FEATURE_FLAGS_KEY);
-            }
-            if (shouldSendFeatureFlags) {
-              ValueMap flags = featureFlags.getFlagVariants();
-              List<String> activeFlags = featureFlags.getFlags();
-
-              // Add all feature variants to event
-              for (Map.Entry<String, Object> entry : flags.entrySet()) {
-                finalProperties.putFeatureFlag(entry.getKey(), entry.getValue());
+              final Options finalOptions;
+              if (options == null) {
+                finalOptions = defaultOptions;
+              } else {
+                finalOptions = options;
               }
 
-              // Add all feature flag keys to $active_feature_flags key
-              finalProperties.putActiveFeatureFlags(activeFlags);
-            }
+              final Properties finalProperties;
+              if (properties == null) {
+                finalProperties = EMPTY_PROPERTIES;
+              } else {
+                finalProperties = properties;
+              }
 
-            CapturePayload.Builder builder =
-                new CapturePayload.Builder().event(event).properties(finalProperties);
-            fillAndEnqueue(builder, finalOptions);
+              // Send feature flags with capture call
+              boolean shouldSendFeatureFlags = true;
+              if (
+                      options != null &&
+                              !options.context().isEmpty() &&
+                              options.context().get(SEND_FEATURE_FLAGS_KEY) instanceof Boolean
+              ) {
+                shouldSendFeatureFlags = (Boolean) options.context().get(SEND_FEATURE_FLAGS_KEY);
+              }
+              if (shouldSendFeatureFlags) {
+                ValueMap flags = featureFlags.getFlagVariants();
+                List<String> activeFlags = featureFlags.getFlags();
+
+                // Add all feature variants to event
+                for (Map.Entry<String, Object> entry : flags.entrySet()) {
+                  finalProperties.putFeatureFlag(entry.getKey(), entry.getValue());
+                }
+
+                // Add all feature flag keys to $active_feature_flags key
+                finalProperties.putActiveFeatureFlags(activeFlags);
+              }
+
+              CapturePayload.Builder builder =
+                  new CapturePayload.Builder().event(event).properties(finalProperties);
+              fillAndEnqueue(builder, finalOptions);
+            } catch (Exception e) {
+              logger.error(e, "executor");
+            }
           }
         });
   }
